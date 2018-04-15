@@ -54,7 +54,9 @@ You can install "pytest-logfest" via `pip`_ from `PyPI`_::
 Usage
 -----
 
-Run ``pytest`` with either ``--logfest=full`` or ``--logfest=basic``. If you use ``--logfest=quiet`` or don't provide the parameter, no log files will be generated.
+The plugin exposes a function-scoped fixture ``logfest_logger`` which can be used as any other Python logger, e.g. ``logfest_logger.info("This is a log record of level info.")``. Pytest's ``--log-cli-level=<level>`` will display these log records.
+
+To write the logs to file, run ``pytest`` with either ``--logfest=full`` or ``--logfest=basic`` as mentioned above. If you use ``--logfest=quiet`` or don't provide the parameter, no log files will be generated.
 
 Note that the plugin sets ``log_level`` and ``log_format``, so changing those will affect the behaviour of the plugin.
 
