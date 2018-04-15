@@ -14,7 +14,8 @@ def pytest_addoption(parser):
 
 
 def pytest_report_header(config):
-    print("Logfest: %s; Timestamp: %s, Log level: %s" % (config.getoption("logfest"), config._timestamp, config.getini("log_level")))
+    print("Logfest: %s; Timestamp: %s, Log level: %s" % (config.getoption("logfest"), config._timestamp,
+                                                         config.getini("log_level")))
 
 
 def pytest_addhooks(pluginmanager):
