@@ -22,21 +22,17 @@ Pytest plugin to write test logs to file(s)
 
 ----
 
-This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
-
 
 Features
 --------
 
-* Logger fixture with specific log node for each test
-
-* With `--logfest=full` writes one log file per test file in a dir tree matching the tests, containing:
+Logger fixture with specific log node for each test:
+  - ``--logfest=full`` writes one log file per test file in a dir tree matching the tests, containing:
     - log records for start and end of each test
     - all log records from the test
-
-* With `--logfest=basic` writes one log file per root test dir, containing:
+  - ``--logfest=basic`` writes one log file per root test dir, containing:
     - log records for start and end of each test
-    - all log records of level `info` or higher from the test
+    - all log records of level ``info`` or higher from the test
     - in case of setup or test failing, all log records from the test
 
 
@@ -58,25 +54,33 @@ You can install "pytest-logfest" via `pip`_ from `PyPI`_::
 Usage
 -----
 
-Run `pytest` with either `--logfest=full` or `--logfest=basic`. If you use `--logfest=quiet` or don't provide the parameter, no log files will be generated.
+Run ``pytest`` with either ``--logfest=full`` or ``--logfest=basic``. If you use ``--logfest=quiet`` or don't provide the parameter, no log files will be generated.
 
-Note that the plugin sets `log_level` and `log_format`, so changing those will affect the behaviour of the plugin.
+Note that the plugin sets ``log_level`` and ``log_format``, so changing those will affect the behaviour of the plugin.
+
 
 Contributing
 ------------
 Contributions are very welcome. Tests can be run with `tox`_, please ensure
 the coverage at least stays the same before you submit a pull request.
 
+
 License
 -------
 
-Distributed under the terms of the `MIT`_ license, "pytest-logfest" is free and open source software
+Distributed under the terms of the `MIT`_ license, "pytest-logfest" is free and open source software.
 
 
 Issues
 ------
 
 If you encounter any problems, please `file an issue`_ along with a detailed description.
+
+
+Acknowledgements
+----------------
+This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
+
 
 .. _`Cookiecutter`: https://github.com/audreyr/cookiecutter
 .. _`@hackebrot`: https://github.com/hackebrot
