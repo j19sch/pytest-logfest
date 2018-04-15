@@ -18,6 +18,10 @@ pytest-logfest
     :target: https://ci.appveyor.com/project/j19sch/pytest-logfest/branch/master
     :alt: See Build Status on AppVeyor
 
+.. image:: https://img.shields.io/github/license/mashape/apistatus.svg
+    :target: https://github.com/j19sch/pytest-logfest/blob/master/LICENSE
+    :alt: MIT license
+
 Pytest plugin to write test logs to file(s)
 
 ----
