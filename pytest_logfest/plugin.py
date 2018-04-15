@@ -23,8 +23,8 @@ def pytest_addhooks(pluginmanager):
     pluginmanager.add_hookspecs(hooks)
 
 
-@pytest.fixture(scope='function')
-def logfest_logger(request):
+@pytest.fixture(scope='function', name='logfest')
+def fxt_logfest(request):
     logfest = LogfestLogger(request)
 
     logfest.logger.info("TEST STARTED")

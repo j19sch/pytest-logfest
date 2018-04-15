@@ -22,8 +22,8 @@ def test_logging_stdout_test_passes(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest):
+            logfest.debug("Debug log line")
             pass
     """)
 
@@ -40,8 +40,8 @@ def test_logging_stdout_test_fails(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest):
+            logfest.debug("Debug log line")
             assert False
     """)
 
@@ -64,8 +64,8 @@ def test_logging_stdout_setup_fails(testdir):
         def setup():
             assert False
 
-        def test_pass(logfest_logger, setup):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest, setup):
+            logfest.debug("Debug log line")
             pass
     """)
 
@@ -90,8 +90,8 @@ def test_logging_stdout_teardown_fails(testdir):
 
             assert False
 
-        def test_pass(logfest_logger, teardown):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest, teardown):
+            logfest.debug("Debug log line")
             pass
     """)
 

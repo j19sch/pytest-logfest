@@ -14,7 +14,7 @@ def test_basic_logging_filename_hook(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
+        def test_pass(logfest):
             pass
     """)
 
@@ -47,7 +47,7 @@ def test_full_logging_filename_hook(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
+        def test_pass(logfest):
             pass
     """)
 

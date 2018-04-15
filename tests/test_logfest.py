@@ -7,7 +7,7 @@ def test_logging_quiet(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
+        def test_pass(logfest):
             pass
     """)
 
@@ -24,8 +24,8 @@ def test_logging_basic_test_passes(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest):
+            logfest.debug("Debug log line")
             pass
      """)
 
@@ -61,8 +61,8 @@ def test_logging_basic_setup_fails(testdir):
         def setup():
             assert False
 
-        def test_pass(logfest_logger, setup):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest, setup):
+            logfest.debug("Debug log line")
      """)
 
     result = testdir.runpytest(
@@ -94,8 +94,8 @@ def test_logging_basic_test_fails(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest):
+            logfest.debug("Debug log line")
             assert False
      """)
 
@@ -135,8 +135,8 @@ def test_logging_basic_teardown_fails(testdir):
 
             assert False
 
-        def test_pass(logfest_logger, teardown):
-            logfest_logger.debug("Debug log line")
+        def test_pass(logfest, teardown):
+            logfest.debug("Debug log line")
      """)
 
     result = testdir.runpytest(
@@ -168,7 +168,7 @@ def test_logging_full_test_passes(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
+        def test_pass(logfest):
             pass
     """)
 
@@ -203,14 +203,14 @@ def test_logging_full_two_testfiles(testdir):
     test_file1 = testdir.tmpdir.join("test_file_one.py")
     test_file1.write("""import pytest
 
-def test_pass(logfest_logger):
+def test_pass(logfest):
     pass
 """)
 
     test_file2 = testdir.tmpdir.join("test_file_two.py")
     test_file2.write("""import pytest
 
-def test_pass(logfest_logger):
+def test_pass(logfest):
     pass
 """)
 
@@ -265,7 +265,7 @@ def test_logging_full_setup_fails(testdir):
         def setup():
             assert False
 
-        def test_pass(logfest_logger, setup):
+        def test_pass(logfest, setup):
             pass
     """)
 
@@ -301,7 +301,7 @@ def test_logging_full_test_fails(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest_logger):
+        def test_pass(logfest):
             assert False
     """)
 
@@ -344,7 +344,7 @@ def test_logging_full_teardown_fails(testdir):
 
             assert False
 
-        def test_pass(logfest_logger, teardown):
+        def test_pass(logfest, teardown):
             pass
     """)
 
@@ -380,7 +380,7 @@ def test_logging_basic_subdirs(testdir):
     test_file = testdir.mkdir("my-tests").join("test_logging_basic_subdirs.py")
     test_file.write("""import pytest
 
-def test_pass(logfest_logger):
+def test_pass(logfest):
     pass
 """)
 
@@ -411,7 +411,7 @@ def test_logging_full_subdirs(testdir):
     test_file = testdir.mkdir("my-tests").join("test_logging_full_subdirs.py")
     test_file.write("""import pytest
 
-def test_pass(logfest_logger):
+def test_pass(logfest):
     pass
 """)
 
