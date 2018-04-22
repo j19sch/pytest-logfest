@@ -80,7 +80,7 @@ def fxt_session_logger(session_fmh):
 
     yield logger
 
-    #ToDo: if logfest=full, write to session log file all log records directly on the session node (all others will be in module files)
+    # ToDo: if logfest=full, write all session nodes log records to session log file
     session_fmh.clear_handler()
 
 

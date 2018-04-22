@@ -6,15 +6,13 @@ from . import helpers
 def test_session_logger(testdir):
     testdir.makepyfile("""
         import pytest
-        
+
         @pytest.fixture(scope='session')
         def session(session_logger):
             session_logger.info("{0}")
-        
+
         def test_pass(session):
             pass
-    
-    
     """.format("Info log line: session"))
 
     result = testdir.runpytest(
@@ -121,7 +119,7 @@ def test_function_logger(testdir):
 def test_test_in_subdir(testdir):
     test_file = testdir.mkdir("my-tests").join("test_subdir.py")
     test_file.write("""import pytest
-    
+
 def test_pass(function_logger):
     pass
 """)
