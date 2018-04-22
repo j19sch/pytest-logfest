@@ -67,7 +67,7 @@ def session_fh(request):
 
         return file_handler
     else:
-        return None
+        return logging.NullHandler()
 
 
 @pytest.fixture(scope='session')
