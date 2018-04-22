@@ -4,6 +4,48 @@ import pytest
 from . import helpers
 
 
+@pytest.mark.xfail(reason='not implemented yet')
+def test_logging_full_session_fixture(testdir):
+    testdir.makepyfile("""
+        import pytest
+
+        @pytest.fixture(scope='session', autouse=True)
+        def session_fixture(session_logger):
+            session_logger.debug("Session debug log line - start")
+            yield
+            session_logger.debug("Session debug log line - end")
+
+        def test_pass(function_logger, session_fixture):
+            function_logger.debug("Debug log line")
+            pass
+     """)
+
+    result = testdir.runpytest(
+        '-v', '--logfest=full'
+    )
+
+    assert result.ret == 0
+
+    artifacts_dir = testdir.tmpdir.join('artifacts')
+
+    assert os.path.isdir(str(artifacts_dir)) is True
+
+    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    assert len(log_files) == 2
+
+    timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
+    basic_logfile = "session-%s.log" % timestamp
+    assert any(filename for filename in log_files if filename == basic_logfile)
+
+    with open(str(artifacts_dir) + "/" + basic_logfile, "r") as file:
+        log = file.read()
+    assert "Session debug log line - start" in log
+    assert "TEST STARTED" in log
+    assert "Debug log line" not in log
+    assert "TEST ENDED" in log
+    assert "Session debug log line - end" in log
+
+
 def test_logging_basic_test_passes(testdir):
     testdir.makepyfile("""
         import pytest

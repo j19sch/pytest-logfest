@@ -51,7 +51,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture(scope='session')
-def session_fmh(request):
+def session_fh(request):
     if request.config.getoption("logfest") in ["basic", "full"]:
         filename_components = ["session", pytest.config._timestamp]
         request.config.hook.pytest_logfest_log_file_name_basic(filename_components=filename_components)
@@ -65,11 +65,14 @@ def session_fmh(request):
         formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
         file_handler.setFormatter(formatter)
 
-        fmh_target = file_handler
+        return file_handler
     else:
-        fmh_target = None
+        return None
 
-    file_memory_handler = MyMemoryHandler(capacity=None, flushLevel=logging.WARNING, target=fmh_target)
+
+@pytest.fixture(scope='session')
+def session_fmh(session_fh):
+    file_memory_handler = MyMemoryHandler(capacity=None, flushLevel=logging.WARNING, target=session_fh)
     return file_memory_handler
 
 
@@ -80,8 +83,8 @@ def fxt_session_logger(session_fmh):
 
     yield logger
 
-    # ToDo: if logfest=full, write all session nodes log records to session log file
-    session_fmh.clear_handler()
+    filter = FilterOnLogLevel(logging.INFO)
+    session_fmh.clear_handler_with_filter(filter)
 
 
 @pytest.fixture(scope='module', name='module_logger')
@@ -110,7 +113,8 @@ def fxt_module_logger(request, session_logger, session_fmh):
 
     yield logger
 
-    session_fmh.clear_handler()
+    filter = FilterOnLogLevel(logging.INFO)
+    session_fmh.clear_handler_with_filter(filter)
 
 
 @pytest.fixture(scope='function', name='function_logger')
@@ -135,16 +139,30 @@ def fxt_function_logger(request, module_logger, session_fmh):
 
     logger.info("TEST ENDED\n")
 
-    session_fmh.clear_handler()
+    filter = FilterOnLogLevel(logging.INFO)
+    session_fmh.clear_handler_with_filter(filter)
+
+
+class FilterOnLogLevel(logging.Filter):
+    def __init__(self, level):
+        self.level = level
+        super(FilterOnLogLevel, self).__init__()
+
+    def filter(self, record):
+        return record.levelno >= self.level
+
+
+class FilterOnExactNodename(logging.Filter):
+    def __init__(self, node_name):
+        self.node_name = node_name
+        super(FilterOnExactNodename, self).__init__()
+
+    def filter(self, record):
+        return record.name == self.node_name
 
 
 class MyMemoryHandler(logging.handlers.MemoryHandler):
     def __init__(self, *args, **kwargs):
-        class FilterInfoAndHigher(logging.Filter):
-            def filter(self, record):
-                return record.levelno >= logging.INFO
-
-        self.info_filter = FilterInfoAndHigher()
         super(MyMemoryHandler, self).__init__(*args, **kwargs)
 
     def shouldFlush(self, record):
@@ -153,11 +171,11 @@ class MyMemoryHandler(logging.handlers.MemoryHandler):
         else:
             return super(MyMemoryHandler, self).shouldFlush(record)
 
-    def clear_handler(self):
+    def clear_handler_with_filter(self, filter):
         if self.target:
-            self.target.addFilter(self.info_filter)
+            self.target.addFilter(filter)
             self.flush()
-            self.target.removeFilter(self.info_filter)
+            self.target.removeFilter(filter)
         else:
             self.flush()
 
