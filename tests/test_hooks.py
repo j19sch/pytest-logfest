@@ -1,6 +1,8 @@
 import os
 import re
 
+from . import helpers
+
 
 def test_basic_logging_filename_hook(testdir):
     testdir.makeconftest("""
@@ -14,7 +16,7 @@ def test_basic_logging_filename_hook(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest):
+        def test_pass(function_logger):
             pass
     """)
 
@@ -28,11 +30,13 @@ def test_basic_logging_filename_hook(testdir):
 
     assert os.path.isdir(str(artifacts_dir)) is True
 
-    log_file = [file for file in os.listdir(str(artifacts_dir)) if ".log" in file]
-    assert len(log_file) == 1
+    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    assert len(log_files) == 1
 
-    pattern = re.compile("^tests-(\d{8}-\d{2}-\d{2}-\d{2})-fizzbuzz.log$")
-    assert pattern.match(log_file[0])
+    timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
+    basic_logfile = "session-%s-fizzbuzz.log" % timestamp
+
+    assert any(filename for filename in log_files if filename == basic_logfile)
 
 
 def test_full_logging_filename_hook(testdir):
@@ -47,7 +51,7 @@ def test_full_logging_filename_hook(testdir):
     testdir.makepyfile("""
         import pytest
 
-        def test_pass(logfest):
+        def test_pass(function_logger):
             pass
     """)
 
@@ -64,8 +68,12 @@ def test_full_logging_filename_hook(testdir):
     log_file = [file for file in os.listdir(str(artifacts_dir)) if ".log" in file]
     assert len(log_file) == 2
 
-    pattern1 = re.compile("^tests-(\d{8}-\d{2}-\d{2}-\d{2}).log$")
-    pattern2 = re.compile("^test_full_logging_filename_hook-(\d{8}-\d{2}-\d{2}-\d{2})-fizzbuzz.log$")
+    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    assert len(log_files) == 2
 
-    assert any(filename for filename in log_file if pattern1.match(filename))
-    assert any(filename for filename in log_file if pattern2.match(filename))
+    timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
+    basic_logfile = "session-%s.log" % timestamp
+    full_logfile = "test_full_logging_filename_hook-%s-fizzbuzz.log" % timestamp
+
+    assert any(filename for filename in log_files if filename == basic_logfile)
+    assert any(filename for filename in log_files if filename == full_logfile)
