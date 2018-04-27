@@ -20,6 +20,8 @@ ROOT_LOG_NODE = 'lf'
 def pytest_addoption(parser):
     parser.addoption("--logfest", action="store", default="", help="Default: <empty>. Options: quiet, basic, full")
 
+    parser.addini("logfest_root_node", "root log node of logfest plugin", default=None)
+
 
 def pytest_report_header(config):
     if config.getoption("logfest"):
@@ -72,9 +74,15 @@ def session_filememoryhandler(session_filehandler):
 
 
 @pytest.fixture(scope='session', name='session_logger')
-def fxt_session_logger(session_filememoryhandler):
-    # ToDo: change root log node to request.node.name; implement hook to change it
-    logger = logging.getLogger(ROOT_LOG_NODE)
+def fxt_session_logger(request, session_filememoryhandler):
+    root_log_node = request.config.getini("logfest_root_node") \
+        if request.config.getini("logfest_root_node") != "" \
+        else request.node.name
+
+    import logging
+    logging.critical(root_log_node)
+
+    logger = logging.getLogger(root_log_node)
     logger.addHandler(session_filememoryhandler)
 
     yield logger

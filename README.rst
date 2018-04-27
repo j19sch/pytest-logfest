@@ -58,11 +58,16 @@ You can install "pytest-logfest" via `pip`_ from `PyPI`_::
 Usage
 -----
 
+The following values in ``pytest.ini`` are relevant for this plugin:
+- ``logfest_root_node``: name of the root log node, defaults to the session's ``request.node.name``
+- ``log-level=debug``: should be set to ``info`` or lower, so pytest captures all relevant log records
+- ``log_format``: the default format is not very convenient in combination with this plugin, suggestion: ``%(name)s - %(levelname)s - %(message)s``
+
 The plugin exposes a function-scoped fixture ``logfest`` which can be used as any other Python logger, e.g. ``logfest.info("This is a log record of level info.")``. Pytest's ``--log-cli-level=<level>`` will display these log records.
 
 To write the logs to file, run ``pytest`` with either ``--logfest=full`` or ``--logfest=basic`` as mentioned above. If you use ``--logfest=quiet`` or don't provide the parameter, no log files will be generated.
 
-Note that the plugin sets ``log_level`` and ``log_format``, so changing those will affect the behaviour of the plugin.
+Note that since the plugin sets ``log_level`` and ``log_format``, so changing those will affect the behaviour of the plugin.
 
 
 Contributing

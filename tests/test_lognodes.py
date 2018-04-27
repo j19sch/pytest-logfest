@@ -3,6 +3,42 @@ import os
 from . import helpers
 
 
+def test_custom_root_log_node(testdir):
+    testdir.makefile(".ini", pytest='[pytest]\nlogfest_root_node=logfest\n')
+
+    testdir.makepyfile("""
+        import pytest
+
+        @pytest.fixture(scope='session')
+        def session(session_logger):
+            session_logger.info("{0}")
+
+        def test_pass(session):
+            pass
+    """.format("Info log line: session"))
+
+    result = testdir.runpytest(
+        '--logfest=full',
+        '--log-level=debug',
+        '--log-format="%(name)s - %(levelname)s - %(message)s"'
+    )
+
+    assert result.ret == 0
+
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is True
+
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
+    assert len(log_files) == 1
+
+    timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
+    basic_logfile = "session-%s.log" % timestamp
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
+
+    expected_log_lines = ["INFO - logfest - Info log line: session"]
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
+
+
 def test_session_logger(testdir):
     testdir.makepyfile("""
         import pytest
@@ -33,7 +69,7 @@ def test_session_logger(testdir):
     basic_logfile = "session-%s.log" % timestamp
     helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
-    expected_log_lines = ["INFO - lf - Info log line: session"]
+    expected_log_lines = ["INFO - test_session_logger0 - Info log line: session"]
     helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
 
 
@@ -72,7 +108,7 @@ def test_module_logger(testdir):
     helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
     helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
-    expected_log_lines = ["INFO - lf.test_module_logger - Info log line: module"]
+    expected_log_lines = ["INFO - test_module_logger0.test_module_logger - Info log line: module"]
     helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
 
 
@@ -108,9 +144,9 @@ def test_function_logger(testdir):
     helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
     helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
-    expected_log_lines = ["INFO - lf.test_function_logger.test_pass - TEST STARTED",
-                          "INFO - lf.test_function_logger.test_pass - Info log line: function",
-                          "INFO - lf.test_function_logger.test_pass - TEST ENDED"
+    expected_log_lines = ["INFO - test_function_logger0.test_function_logger.test_pass - TEST STARTED",
+                          "INFO - test_function_logger0.test_function_logger.test_pass - Info log line: function",
+                          "INFO - test_function_logger0.test_function_logger.test_pass - TEST ENDED"
                           ]
     helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
     helpers.assert_lines_in_logfile(artifacts_dir + "/" + full_logfile, expected_log_lines)
@@ -149,8 +185,8 @@ def test_pass(function_logger):
     full_logfile = "test_subdir-%s.log" % timestamp
     helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
-    expected_log_lines = ["INFO - lf.my-tests.test_subdir.test_pass - TEST STARTED",
-                          "INFO - lf.my-tests.test_subdir.test_pass - TEST ENDED"
+    expected_log_lines = ["INFO - test_test_in_subdir0.my-tests.test_subdir.test_pass - TEST STARTED",
+                          "INFO - test_test_in_subdir0.my-tests.test_subdir.test_pass - TEST ENDED"
                           ]
 
     helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
