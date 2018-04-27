@@ -16,25 +16,25 @@ def test_session_logger(testdir):
     """.format("Info log line: session"))
 
     result = testdir.runpytest(
-        '--logfest=full'
+        '--logfest=full',
+        '--log-level=debug',
+        '--log-format="%(name)s - %(levelname)s - %(message)s"'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is True
 
-    assert os.path.isdir(str(artifacts_dir)) is True
-
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 1
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == basic_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
-    with open(str(artifacts_dir) + "/" + basic_logfile, "r") as logfile:
-        log = logfile.read()
-    assert "INFO - lf - Info log line: session" in log
+    expected_log_lines = ["INFO - lf - Info log line: session"]
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
 
 
 def test_module_logger(testdir):
@@ -52,29 +52,28 @@ def test_module_logger(testdir):
     """.format("Info log line: module"))
 
     result = testdir.runpytest(
-        '--logfest=full'
+        '--logfest=full',
+        '--log-level=debug',
+        '--log-format="%(name)s - %(levelname)s - %(message)s"'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is True
 
-    assert os.path.isdir(str(artifacts_dir)) is True
-
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 2
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
     full_logfile = "test_module_logger-%s.log" % timestamp
 
-    assert any(filename for filename in log_files if filename == basic_logfile)
-    assert any(filename for filename in log_files if filename == full_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
+    helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
-    for log_file in [basic_logfile, full_logfile]:
-        with open(str(artifacts_dir) + "/" + log_file, "r") as logfile:
-            log = logfile.read()
-        assert "INFO - lf.test_module_logger - Info log line: module" in log
+    expected_log_lines = ["INFO - lf.test_module_logger - Info log line: module"]
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
 
 
 def test_function_logger(testdir):
@@ -89,31 +88,32 @@ def test_function_logger(testdir):
     """.format("Info log line: function"))
 
     result = testdir.runpytest(
-        '--logfest=full'
+        '--logfest=full',
+        '--log-level=debug',
+        '--log-format="%(name)s - %(levelname)s - %(message)s"'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is True
 
-    assert os.path.isdir(str(artifacts_dir)) is True
-
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 2
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
     full_logfile = "test_function_logger-%s.log" % timestamp
 
-    assert any(filename for filename in log_files if filename == basic_logfile)
-    assert any(filename for filename in log_files if filename == full_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
+    helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
-    for log_file in [basic_logfile, full_logfile]:
-        with open(str(artifacts_dir) + "/" + log_file, "r") as logfile:
-            log = logfile.read()
-        assert "INFO - lf.test_function_logger.test_pass - TEST STARTED" in log
-        assert "INFO - lf.test_function_logger.test_pass - Info log line: function" in log
-        assert "INFO - lf.test_function_logger.test_pass - TEST ENDED" in log
+    expected_log_lines = ["INFO - lf.test_function_logger.test_pass - TEST STARTED",
+                          "INFO - lf.test_function_logger.test_pass - Info log line: function",
+                          "INFO - lf.test_function_logger.test_pass - TEST ENDED"
+                          ]
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + full_logfile, expected_log_lines)
 
 
 def test_test_in_subdir(testdir):
@@ -125,30 +125,33 @@ def test_pass(function_logger):
 """)
 
     result = testdir.runpytest(
-        '-v', '--logfest=full'
+        '--logfest=full',
+        '--log-level=debug',
+        '--log-format="%(name)s - %(levelname)s - %(message)s"'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
-    assert os.path.isdir(str(artifacts_dir)) is True
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is True
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 1
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == basic_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
-    artifacts_subdir = testdir.tmpdir.join('artifacts/my-tests')
-    assert os.path.isdir(str(artifacts_subdir)) is True
+    artifacts_subdir = str(testdir.tmpdir.join('artifacts/my-tests'))
+    assert os.path.isdir(artifacts_subdir) is True
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_subdir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_subdir)
     assert len(log_files) == 1
     full_logfile = "test_subdir-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == full_logfile)
+    helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
-    for log_file in [str(artifacts_dir) + "/" + basic_logfile, str(artifacts_subdir) + "/" + full_logfile]:
-        with open(log_file, "r") as logfile:
-            log = logfile.read()
-        assert "INFO - lf.my-tests.test_subdir.test_pass - TEST STARTED" in log
-        assert "INFO - lf.my-tests.test_subdir.test_pass - TEST ENDED" in log
+    expected_log_lines = ["INFO - lf.my-tests.test_subdir.test_pass - TEST STARTED",
+                          "INFO - lf.my-tests.test_subdir.test_pass - TEST ENDED"
+                          ]
+
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
+    helpers.assert_lines_in_logfile(artifacts_subdir + "/" + full_logfile, expected_log_lines)

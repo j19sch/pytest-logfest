@@ -20,10 +20,6 @@ ROOT_LOG_NODE = 'lf'
 def pytest_addoption(parser):
     parser.addoption("--logfest", action="store", default="", help="Default: <empty>. Options: quiet, basic, full")
 
-    # ToDo: consider different solutions (and document why they're needed)
-    parser.addini("log_level", "log level", default="DEBUG")
-    parser.addini("log_format", "log format", default='%(name)s - %(levelname)s - %(message)s')
-
 
 def pytest_report_header(config):
     if config.getoption("logfest"):
@@ -51,7 +47,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture(scope='session')
-def session_fh(request):
+def session_filehandler(request):
     if request.config.getoption("logfest") in ["basic", "full"]:
         filename_components = ["session", pytest.config._timestamp]
         request.config.hook.pytest_logfest_log_file_name_basic(filename_components=filename_components)
@@ -59,7 +55,6 @@ def session_fh(request):
 
         _create_directory_if_it_not_exists('./artifacts')
 
-        # ToDo: add try... except ...
         file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a')
         file_handler.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
@@ -71,24 +66,25 @@ def session_fh(request):
 
 
 @pytest.fixture(scope='session')
-def session_fmh(session_fh):
-    file_memory_handler = MyMemoryHandler(capacity=None, flushLevel=logging.WARNING, target=session_fh)
+def session_filememoryhandler(session_filehandler):
+    file_memory_handler = MyMemoryHandler(capacity=None, flushLevel=logging.WARNING, target=session_filehandler)
     return file_memory_handler
 
 
 @pytest.fixture(scope='session', name='session_logger')
-def fxt_session_logger(session_fmh):
+def fxt_session_logger(session_filememoryhandler):
+    # ToDo: change root log node to request.node.name; implement hook to change it
     logger = logging.getLogger(ROOT_LOG_NODE)
-    logger.addHandler(session_fmh)
+    logger.addHandler(session_filememoryhandler)
 
     yield logger
 
     filter = FilterOnLogLevel(logging.INFO)
-    session_fmh.clear_handler_with_filter(filter)
+    session_filememoryhandler.clear_handler_with_filter(filter)
 
 
 @pytest.fixture(scope='module', name='module_logger')
-def fxt_module_logger(request, session_logger, session_fmh):
+def fxt_module_logger(request, session_logger, session_filememoryhandler):
     full_path = Path(request.node.name)
     file_basename = full_path.stem
 
@@ -100,7 +96,6 @@ def fxt_module_logger(request, session_logger, session_fmh):
         log_dir = "./artifacts/" + os.path.sep.join(file_path)
         _create_directory_if_it_not_exists(log_dir)
 
-        # ToDo: add try... except ...
         filename_components = [file_basename, pytest.config._timestamp]
         request.config.hook.pytest_logfest_log_file_name_full(filename_components=filename_components)
         filename = "-".join(filename_components) + ".log"
@@ -114,11 +109,11 @@ def fxt_module_logger(request, session_logger, session_fmh):
     yield logger
 
     filter = FilterOnLogLevel(logging.INFO)
-    session_fmh.clear_handler_with_filter(filter)
+    session_filememoryhandler.clear_handler_with_filter(filter)
 
 
 @pytest.fixture(scope='function', name='function_logger')
-def fxt_function_logger(request, module_logger, session_fmh):
+def fxt_function_logger(request, module_logger, session_filememoryhandler):
     logger = module_logger.getChild(request.node.name)
 
     logger.info("TEST STARTED")
@@ -140,7 +135,7 @@ def fxt_function_logger(request, module_logger, session_fmh):
     logger.info("TEST ENDED\n")
 
     filter = FilterOnLogLevel(logging.INFO)
-    session_fmh.clear_handler_with_filter(filter)
+    session_filememoryhandler.clear_handler_with_filter(filter)
 
 
 class FilterOnLogLevel(logging.Filter):

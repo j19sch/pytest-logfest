@@ -19,7 +19,8 @@ def test_no_fixtures(testdir):
 
     assert result.ret == 0
 
-    assert os.path.isdir(str(testdir.tmpdir.join('artifacts'))) is False
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is False
 
 
 def test_logging_quiet(testdir):
@@ -31,12 +32,13 @@ def test_logging_quiet(testdir):
     """)
 
     result = testdir.runpytest(
-        '-v', '--logfest=quiet'
+        '--logfest=quiet'
     )
 
     assert result.ret == 0
 
-    assert os.path.isdir(str(testdir.tmpdir.join('artifacts'))) is False
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+    assert os.path.isdir(artifacts_dir) is False
 
 
 def test_logging_basic(testdir):
@@ -49,21 +51,21 @@ def test_logging_basic(testdir):
      """)
 
     result = testdir.runpytest(
-        '-v', '--logfest=basic'
+        '--logfest=basic'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
 
-    assert os.path.isdir(str(artifacts_dir)) is True
+    assert os.path.isdir(artifacts_dir) is True
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 1
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == basic_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
 
 def test_logging_full(testdir):
@@ -76,25 +78,25 @@ def test_logging_full(testdir):
      """)
 
     result = testdir.runpytest(
-        '-v', '--logfest=full'
+        '--logfest=full'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
 
-    assert os.path.isdir(str(artifacts_dir)) is True
+    assert os.path.isdir(artifacts_dir) is True
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 2
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
 
     basic_logfile = "session-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == basic_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
     full_logfile = "test_logging_full-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == full_logfile)
+    helpers.assert_filename_in_list_of_files(full_logfile, log_files)
 
 
 def test_logging_full_two_testfiles(testdir):
@@ -113,28 +115,28 @@ def test_pass(function_logger):
 """)
 
     result = testdir.runpytest(
-        '-v', '--logfest=full'
+        '--logfest=full'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
 
-    assert os.path.isdir(str(artifacts_dir)) is True
+    assert os.path.isdir(artifacts_dir) is True
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 3
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
 
     basic_logfile = "session-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == basic_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
     full_logfile_1 = "test_file_one-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == full_logfile_1)
+    helpers.assert_filename_in_list_of_files(full_logfile_1, log_files)
 
     full_logfile_2 = "test_file_two-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == full_logfile_2)
+    helpers.assert_filename_in_list_of_files(full_logfile_2, log_files)
 
 
 def test_logging_full_subdirs(testdir):
@@ -146,24 +148,25 @@ def test_pass(function_logger):
 """)
 
     result = testdir.runpytest(
-        '-v', '--logfest=full'
+        '--logfest=full'
     )
 
     assert result.ret == 0
 
-    artifacts_dir = testdir.tmpdir.join('artifacts')
-    assert os.path.isdir(str(artifacts_dir)) is True
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_dir)) if ".log" in logfile]
+    assert os.path.isdir(artifacts_dir) is True
+
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
     assert len(log_files) == 1
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == basic_logfile)
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
-    artifacts_subdir = testdir.tmpdir.join('artifacts/my-tests')
-    assert os.path.isdir(str(artifacts_subdir)) is True
+    artifacts_subdir = str(testdir.tmpdir.join('artifacts/my-tests'))
+    assert os.path.isdir(artifacts_subdir) is True
 
-    log_files = [logfile for logfile in os.listdir(str(artifacts_subdir)) if ".log" in logfile]
+    log_files = helpers.get_logfiles_in_testdir(artifacts_subdir)
     assert len(log_files) == 1
     full_logfile = "test_logging_full_subdirs-%s.log" % timestamp
-    assert any(filename for filename in log_files if filename == full_logfile)
+    helpers.assert_filename_in_list_of_files(full_logfile, log_files)
