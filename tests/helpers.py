@@ -12,7 +12,7 @@ def get_logfiles_in_testdir(dir):
 
 
 def assert_filename_in_list_of_files(filename, list):
-    assert any(_ for _ in list if _ == filename)
+    assert any(_ for _ in list if _ == filename), "File %s was not present in: %s" % (filename, list)
 
 
 def assert_lines_in_logfile(logfile, present=None, not_present=None):

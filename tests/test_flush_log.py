@@ -4,7 +4,6 @@ import pytest
 from . import helpers
 
 
-@pytest.mark.xfail(reason='not implemented yet')
 def test_logging_full_session_fixture(testdir):
     testdir.makepyfile("""
         import pytest
@@ -16,7 +15,6 @@ def test_logging_full_session_fixture(testdir):
             session_logger.debug("Session debug log line - end")
 
         def test_pass(function_logger, session_fixture):
-            function_logger.debug("Debug log line")
             pass
      """)
 
@@ -31,19 +29,30 @@ def test_logging_full_session_fixture(testdir):
     assert os.path.isdir(artifacts_dir) is True
 
     log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
-    assert len(log_files) == 2
+    assert len(log_files) == 3
 
     timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
     basic_logfile = "session-%s.log" % timestamp
     helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
+    expected_log_lines = ["TEST STARTED",
+                          "TEST ENDED"
+                          ]
+    non_expected_log_lines = ["Session debug log line - start",
+                              "Session debug log line - end"
+                              ]
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines, non_expected_log_lines)
+
+    session_logfile = "test_logging_full_session_fixture0-%s.log" % timestamp
+    helpers.assert_filename_in_list_of_files(session_logfile, log_files)
+
     expected_log_lines = ["Session debug log line - start",
-                          "TEST STARTED",
-                          "Debug log line",
-                          "TEST ENDED",
                           "Session debug log line - end"
                           ]
-    helpers.assert_lines_in_logfile(artifacts_dir + "/" + basic_logfile, expected_log_lines)
+    non_expected_log_lines = ["TEST STARTED",
+                              "TEST ENDED"
+                              ]
+    helpers.assert_lines_in_logfile(artifacts_dir + "/" + session_logfile, expected_log_lines, non_expected_log_lines)
 
 
 def test_logging_full_test_passes(testdir):

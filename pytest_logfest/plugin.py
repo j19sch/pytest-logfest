@@ -48,6 +48,14 @@ def pytest_runtest_makereport(item, call):
     setattr(item, "rep_" + rep.when, rep)
 
 
+@pytest.fixture(scope='session', autouse=True)
+def root_log_node(request):
+    if request.config.getini("logfest_root_node"):
+        return request.config.getini("logfest_root_node")
+    else:
+        return request.node.name
+
+
 @pytest.fixture(scope='session')
 def session_filehandler(request):
     if request.config.getoption("logfest") in ["basic", "full"]:
@@ -73,17 +81,30 @@ def session_filememoryhandler(session_filehandler):
     return file_memory_handler
 
 
+@pytest.fixture(scope='session')
+def session_filtered_filehandler(request, root_log_node):
+    if request.config.getoption("logfest") == "full":
+        filename_components = [root_log_node, pytest.config._timestamp]
+        filename = "-".join(filename_components) + ".log"
+
+        file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a', delay=True)
+        file_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
+        file_handler.setFormatter(formatter)
+
+        filter = FilterOnExactNodename(root_log_node)
+        file_handler.addFilter(filter)
+
+        return file_handler
+    else:
+        return logging.NullHandler()
+
+
 @pytest.fixture(scope='session', name='session_logger')
-def fxt_session_logger(request, session_filememoryhandler):
-    root_log_node = request.config.getini("logfest_root_node") \
-        if request.config.getini("logfest_root_node") != "" \
-        else request.node.name
-
-    import logging
-    logging.critical(root_log_node)
-
+def fxt_session_logger(root_log_node, session_filememoryhandler, session_filtered_filehandler):
     logger = logging.getLogger(root_log_node)
     logger.addHandler(session_filememoryhandler)
+    logger.addHandler(session_filtered_filehandler)
 
     yield logger
 

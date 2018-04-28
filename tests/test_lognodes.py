@@ -18,7 +18,7 @@ def test_custom_root_log_node(testdir):
     """.format("Info log line: session"))
 
     result = testdir.runpytest(
-        '--logfest=full',
+        '--logfest=basic',
         '--log-level=debug',
         '--log-format="%(name)s - %(levelname)s - %(message)s"'
     )
@@ -52,7 +52,7 @@ def test_session_logger(testdir):
     """.format("Info log line: session"))
 
     result = testdir.runpytest(
-        '--logfest=full',
+        '--logfest=basic',
         '--log-level=debug',
         '--log-format="%(name)s - %(levelname)s - %(message)s"'
     )

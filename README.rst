@@ -59,7 +59,7 @@ Usage
 -----
 
 The following values in ``pytest.ini`` are relevant for this plugin:
-- ``logfest_root_node``: name of the root log node, defaults to the session's ``request.node.name``
+- ``logfest_root_node``: name used for root log node and in log filenames; if not set, defaults to the session's ``request.node.name``
 - ``log-level=debug``: should be set to ``info`` or lower, so pytest captures all relevant log records
 - ``log_format``: the default format is not very convenient in combination with this plugin, suggestion: ``%(name)s - %(levelname)s - %(message)s``
 

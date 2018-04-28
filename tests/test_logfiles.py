@@ -14,7 +14,7 @@ def test_no_fixtures(testdir):
     """.format("Info log line: session"))
 
     result = testdir.runpytest(
-        '--logfest=basic'
+        '--logfest=basic', '--log-level=debug'
     )
 
     assert result.ret == 0
@@ -32,7 +32,7 @@ def test_logging_quiet(testdir):
     """)
 
     result = testdir.runpytest(
-        '--logfest=quiet'
+        '--logfest=quiet', '--log-level=debug'
     )
 
     assert result.ret == 0
@@ -51,7 +51,7 @@ def test_logging_basic(testdir):
      """)
 
     result = testdir.runpytest(
-        '--logfest=basic'
+        '--logfest=basic', '--log-level=debug'
     )
 
     assert result.ret == 0
@@ -68,7 +68,7 @@ def test_logging_basic(testdir):
     helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
 
-def test_logging_full(testdir):
+def test_logging_full_no_session_logger(testdir):
     testdir.makepyfile("""
         import pytest
 
@@ -78,7 +78,7 @@ def test_logging_full(testdir):
      """)
 
     result = testdir.runpytest(
-        '--logfest=full'
+        '--logfest=full', '--log-level=debug'
     )
 
     assert result.ret == 0
@@ -95,8 +95,45 @@ def test_logging_full(testdir):
     basic_logfile = "session-%s.log" % timestamp
     helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
 
-    full_logfile = "test_logging_full-%s.log" % timestamp
+    full_logfile = "test_logging_full_no_session_logger-%s.log" % timestamp
     helpers.assert_filename_in_list_of_files(full_logfile, log_files)
+
+
+def test_logging_full_session_logger(testdir):
+    testdir.makepyfile("""
+        import pytest
+        
+        @pytest.fixture(scope='session', autouse=True)
+        def session(session_logger):
+            session_logger.info("Session INFO log line")
+
+        def test_pass(function_logger):
+            pass
+     """)
+
+    result = testdir.runpytest(
+        '--logfest=full', '--log-level=debug'
+    )
+
+    assert result.ret == 0
+
+    artifacts_dir = str(testdir.tmpdir.join('artifacts'))
+
+    assert os.path.isdir(artifacts_dir) is True
+
+    log_files = helpers.get_logfiles_in_testdir(artifacts_dir)
+    assert len(log_files) == 3
+
+    timestamp = helpers.get_timestamp_from_logfile_name(log_files[0])
+
+    basic_logfile = "session-%s.log" % timestamp
+    helpers.assert_filename_in_list_of_files(basic_logfile, log_files)
+
+    full_logfile = "test_logging_full_session_logger-%s.log" % timestamp
+    helpers.assert_filename_in_list_of_files(full_logfile, log_files)
+
+    session_logfile = "test_logging_full_session_logger0-%s.log" % timestamp
+    helpers.assert_filename_in_list_of_files(session_logfile, log_files)
 
 
 def test_logging_full_two_testfiles(testdir):
@@ -115,7 +152,7 @@ def test_pass(function_logger):
 """)
 
     result = testdir.runpytest(
-        '--logfest=full'
+        '--logfest=full', '--log-level=debug'
     )
 
     assert result.ret == 0
@@ -148,7 +185,7 @@ def test_pass(function_logger):
 """)
 
     result = testdir.runpytest(
-        '--logfest=full'
+        '--logfest=full', '--log-level=debug'
     )
 
     assert result.ret == 0
