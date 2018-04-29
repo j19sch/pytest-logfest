@@ -22,7 +22,7 @@ pytest-logfest
     :target: https://github.com/j19sch/pytest-logfest/blob/master/LICENSE
     :alt: MIT license
 
-Pytest plugin to write test logs to file(s)
+Pytest plugin providing three logger fixtures with basic or full writing to log files
 
 ----
 
@@ -30,21 +30,18 @@ Pytest plugin to write test logs to file(s)
 Features
 --------
 
-Logger fixture with specific log node for each test:
-  - ``--logfest=full`` writes one log file per test file in a dir tree matching the tests, containing:
-    - log records for start and end of each test
-    - all log records from the test
-  - ``--logfest=basic`` writes one log file per root test dir, containing:
-    - log records for start and end of each test
-    - all log records of level ``info`` or higher from the test
-    - in case of setup or test failing, all log records from the test
+Three logger fixtures, one of each scope: session, module and function.
+
+Three options for writing log records to file: quiet, basic, full.
+
 
 
 Requirements
 ------------
 
 * Pytest
-* Pathlib2 (if using Python 2)
+* Pathlib2 (if using Python 2.7)
+
 
 
 Installation
@@ -55,25 +52,67 @@ You can install "pytest-logfest" via `pip`_ from `PyPI`_::
     $ pip install pytest-logfest
 
 
+
 Usage
 -----
 
-The following values in ``pytest.ini`` are relevant for this plugin:
-- ``logfest_root_node``: name used for root log node and in log filenames; if not set, defaults to the session's ``request.node.name``
-- ``log-level=debug``: should be set to ``info`` or lower, so pytest captures all relevant log records
-- ``log_format``: the default format is not very convenient in combination with this plugin, suggestion: ``%(name)s - %(levelname)s - %(message)s``
+Fixtures
+~~~~~~~~
+The three logger fixtures exposed by this plugin are:
 
-The plugin exposes a function-scoped fixture ``logfest`` which can be used as any other Python logger, e.g. ``logfest.info("This is a log record of level info.")``. Pytest's ``--log-cli-level=<level>`` will display these log records.
+- ``session_logger``
+- ``module_logger``
+- ``function_logger``
 
-To write the logs to file, run ``pytest`` with either ``--logfest=full`` or ``--logfest=basic`` as mentioned above. If you use ``--logfest=quiet`` or don't provide the parameter, no log files will be generated.
+They expose a Python ``Logger`` object, so you can use them as such, e.g. ``session_logger.INFO("This is a log record of level INFO.")``
+The log nodes of these loggers match the path to the corresponding location or file.
 
-Note that since the plugin sets ``log_level`` and ``log_format``, so changing those will affect the behaviour of the plugin.
+Pytest's ``--log-cli-level=<level>`` will display these log records on stdout.
+
+
+Log filenames
+~~~~~~~~~~~~~
+Writing the log records of the loggers to file can be controlled by the ``--logfest`` command-line option:
+
+- ``--logfest=quiet`` or option omitted: no log files are written.
+- ``--logfest=basic``: one log file containing INFO and higher for passed tests, DEBUG and higher for setup errors or failed tests.
+- ``--logfest=full``: in addition to the basic log file, all log records are written to a session log file and one log file per module.
+
+Log file names and locations are as follows (directories will be created if needed):
+
+- basic log file in ``./artifacts``: ``session-<session timestmap>.log``
+- session-level full log file in ``./artifacts``: ``<request.node.name | root_log_node>-<session timestmap>.log``
+- module-level full log file in ``./artifacts/<path-to-module>``: ``<module_name>-<session timestmap>.log``
+
+``root_log_node`` can be set in ``pytest.ini`` (see below). You can change the compostion of file names through hooks (see below).
+
+
+pytest.ini
+~~~~~~~~~~
+The following values in ``pytest.ini`` are relevant to this plugin:
+
+- ``logfest_root_node``: name used as root log node and in log filenames; if not set, defaults to the session's ``request.node.name``.
+- ``log-level``: should be set to ``info`` or lower, so pytest captures all relevant log records.
+- ``log-format``: the default format is not very convenient in combination with this plugin, suggestion: ``%(name)s - %(levelname)s - %(message)s``
+
+
+Hooks
+~~~~~
+There are three hooks to change the components of the log filenames:
+
+- ``pytest_logfest_log_file_name_basic``
+- ``pytest_logfest_log_file_name_full_session``
+- ``pytest_logfest_log_file_name_full_module``
+
+The expose a list that will be joined with the separator character ``-`` and appended with ``.log``.
+
 
 
 Contributing
 ------------
 Contributions are very welcome. Tests can be run with `tox`_, please ensure
-the coverage at least stays the same before you submit a pull request.
+good test coverage before you submit a pull request.
+
 
 
 License
@@ -82,15 +121,19 @@ License
 Distributed under the terms of the `MIT`_ license, "pytest-logfest" is free and open source software.
 
 
+
 Issues
 ------
 
 If you encounter any problems, please `file an issue`_ along with a detailed description.
 
 
+
 Acknowledgements
 ----------------
 This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
+
+Thanks to my employer `Mendix`_, for the crafting days in which I worked on this plugin, and for the permission to open-source it.
 
 
 .. _`Cookiecutter`: https://github.com/audreyr/cookiecutter
@@ -105,3 +148,4 @@ This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`
 .. _`tox`: https://tox.readthedocs.io/en/latest/
 .. _`pip`: https://pypi.org/project/pip/
 .. _`PyPI`: https://pypi.org/project
+.. _`Mendix`: https://www.mendix.com
