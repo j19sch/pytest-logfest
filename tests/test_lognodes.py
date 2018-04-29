@@ -4,7 +4,7 @@ from . import helpers
 
 
 def test_custom_root_log_node(testdir):
-    testdir.makefile(".ini", pytest='[pytest]\nlogfest_root_node=logfest\n')
+    testdir.makefile(".ini", pytest='[pytest]\nlogfest-root-node=logfest\n')
 
     testdir.makepyfile("""
         import pytest

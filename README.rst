@@ -81,17 +81,17 @@ Writing the log records of the loggers to file can be controlled by the ``--logf
 Log file names and locations are as follows (directories will be created if needed):
 
 - basic log file in ``./artifacts``: ``session-<session timestmap>.log``
-- session-level full log file in ``./artifacts``: ``<request.node.name | root_log_node>-<session timestmap>.log``
+- session-level full log file in ``./artifacts``: ``<request.node.name | logfest-root-node>-<session timestmap>.log``
 - module-level full log file in ``./artifacts/<path-to-module>``: ``<module_name>-<session timestmap>.log``
 
-``root_log_node`` can be set in ``pytest.ini`` (see below). You can change the compostion of file names through hooks (see below).
+``logfest-root-node`` can be set in ``pytest.ini`` (see below). You can change the compostion of file names through hooks (see below).
 
 
 pytest.ini
 ~~~~~~~~~~
 The following values in ``pytest.ini`` are relevant to this plugin:
 
-- ``logfest_root_node``: name used as root log node and in log filenames; if not set, defaults to the session's ``request.node.name``.
+- ``logfest-root-node``: name used as root log node and in log filenames; if not set, defaults to the session's ``request.node.name``.
 - ``log-level``: should be set to ``info`` or lower, so pytest captures all relevant log records.
 - ``log-format``: the default format is not very convenient in combination with this plugin, suggestion: ``%(name)s - %(levelname)s - %(message)s``
 

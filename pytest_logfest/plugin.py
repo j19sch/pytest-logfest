@@ -7,6 +7,7 @@ import logging
 import logging.handlers
 import pytest
 
+from pytest_logfest.logging_classes import FilterOnLogLevel, FilterOnExactNodename, MyMemoryHandler
 
 try:
     from pathlib import Path
@@ -20,7 +21,7 @@ ROOT_LOG_NODE = 'lf'
 def pytest_addoption(parser):
     parser.addoption("--logfest", action="store", default="", help="Default: <empty>. Options: quiet, basic, full")
 
-    parser.addini("logfest_root_node", "root log node of logfest plugin", default=None)
+    parser.addini("logfest-root-node", "root log node of logfest plugin", default=None)
 
 
 def pytest_report_header(config):
@@ -50,8 +51,8 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope='session', autouse=True)
 def root_log_node(request):
-    if request.config.getini("logfest_root_node"):
-        return request.config.getini("logfest_root_node")
+    if request.config.getini("logfest-root-node"):
+        return request.config.getini("logfest-root-node")
     else:
         return request.node.name
 
@@ -166,43 +167,6 @@ def fxt_function_logger(request, module_logger, session_filememoryhandler):
 
     filter = FilterOnLogLevel(logging.INFO)
     session_filememoryhandler.clear_handler_with_filter(filter)
-
-
-class FilterOnLogLevel(logging.Filter):
-    def __init__(self, level):
-        self.level = level
-        super(FilterOnLogLevel, self).__init__()
-
-    def filter(self, record):
-        return record.levelno >= self.level
-
-
-class FilterOnExactNodename(logging.Filter):
-    def __init__(self, node_name):
-        self.node_name = node_name
-        super(FilterOnExactNodename, self).__init__()
-
-    def filter(self, record):
-        return record.name == self.node_name
-
-
-class MyMemoryHandler(logging.handlers.MemoryHandler):
-    def __init__(self, *args, **kwargs):
-        super(MyMemoryHandler, self).__init__(*args, **kwargs)
-
-    def shouldFlush(self, record):
-        if self.capacity is None:
-            return record.levelno >= self.flushLevel
-        else:
-            return super(MyMemoryHandler, self).shouldFlush(record)
-
-    def clear_handler_with_filter(self, filter):
-        if self.target:
-            self.target.addFilter(filter)
-            self.flush()
-            self.target.removeFilter(filter)
-        else:
-            self.flush()
 
 
 def _create_directory_if_it_not_exists(path):
