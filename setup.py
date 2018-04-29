@@ -13,14 +13,14 @@ def read(fname):
 
 setup(
     name='pytest-logfest',
-    version='0.1.0',
+    version='0.2.0',
     author='Joep Schuurkes',
     author_email='j19sch@gmail.com',
     maintainer='Joep Schuurkes',
     maintainer_email='j19sch@gmail.com',
     license='MIT',
     url='https://github.com/j19sch/pytest-logfest',
-    description='Pytest plugin to write test logs to file(s)',
+    description='Pytest plugin providing three logger fixtures with basic or full writing to log files',
     long_description=read('README.rst'),
     packages=['pytest_logfest'],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
