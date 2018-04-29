@@ -85,6 +85,7 @@ def session_filememoryhandler(session_filehandler):
 def session_filtered_filehandler(request, root_log_node):
     if request.config.getoption("logfest") == "full":
         filename_components = [root_log_node, pytest.config._timestamp]
+        request.config.hook.pytest_logfest_log_file_name_full_session(filename_components=filename_components)
         filename = "-".join(filename_components) + ".log"
 
         file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a', delay=True)
@@ -126,7 +127,7 @@ def fxt_module_logger(request, session_logger, session_filememoryhandler):
         _create_directory_if_it_not_exists(log_dir)
 
         filename_components = [file_basename, pytest.config._timestamp]
-        request.config.hook.pytest_logfest_log_file_name_full(filename_components=filename_components)
+        request.config.hook.pytest_logfest_log_file_name_full_module(filename_components=filename_components)
         filename = "-".join(filename_components) + ".log"
 
         fh = logging.FileHandler('%s/%s' % (log_dir, filename), mode='a')

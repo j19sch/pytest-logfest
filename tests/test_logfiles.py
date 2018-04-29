@@ -102,7 +102,7 @@ def test_logging_full_no_session_logger(testdir):
 def test_logging_full_session_logger(testdir):
     testdir.makepyfile("""
         import pytest
-        
+
         @pytest.fixture(scope='session', autouse=True)
         def session(session_logger):
             session_logger.info("Session INFO log line")
