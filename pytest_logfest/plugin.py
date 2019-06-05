@@ -7,7 +7,7 @@ import logging
 import logging.handlers
 import pytest
 
-from pytest_logfest.logging_classes import FilterOnLogLevel, FilterOnExactNodename, MyMemoryHandler
+from pytest_logfest.logging_classes import FilterOnExactNodename, MyMemoryHandler
 
 try:
     from pathlib import Path
@@ -82,8 +82,7 @@ def fxt_session_logger(request, root_log_node, session_filememoryhandler):
 
     yield logger
 
-    memoryhandler_filter = FilterOnLogLevel(logging.INFO)
-    session_filememoryhandler.clear_handler_with_filter(memoryhandler_filter)
+    session_filememoryhandler.flush_with_filter_on_info()
 
 
 @pytest.fixture(scope='module', name='module_logger')
@@ -105,8 +104,7 @@ def fxt_module_logger(request, session_logger, session_filememoryhandler):
 
     yield logger
 
-    filter = FilterOnLogLevel(logging.INFO)
-    session_filememoryhandler.clear_handler_with_filter(filter)
+    session_filememoryhandler.flush_with_filter_on_info()
 
 
 @pytest.fixture(scope='function', name='function_logger')
@@ -136,8 +134,7 @@ def fxt_function_logger(request, module_logger, session_filememoryhandler):
 
     logger.info("TEST ENDED\n")
 
-    filter = FilterOnLogLevel(logging.INFO)
-    session_filememoryhandler.clear_handler_with_filter(filter)
+    session_filememoryhandler.flush_with_filter_on_info()
 
 
 def _create_logging_file_handler(path_to_file, delay=False):
@@ -168,7 +165,7 @@ def _create_full_session_filehandler(request, root_log_node):
 
     file_handler = _create_logging_file_handler('./artifacts/%s' % filename, delay=True)
 
-    filter = FilterOnExactNodename(root_log_node)  # only session-level records, all others to module filehandler
+    filter = FilterOnExactNodename(root_log_node)  # only session-level records, all others go to module filehandler
     file_handler.addFilter(filter)
 
     return file_handler
