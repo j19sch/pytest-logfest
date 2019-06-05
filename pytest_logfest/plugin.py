@@ -15,9 +15,6 @@ except (ImportError, AttributeError):
     from pathlib2 import Path
 
 
-ROOT_LOG_NODE = 'lf'
-
-
 def pytest_addoption(parser):
     parser.addoption("--logfest", action="store", default="", help="Default: <empty>. Options: quiet, basic, full")
 
@@ -59,7 +56,10 @@ def root_log_node(request):
 
 @pytest.fixture(scope='session')
 def session_filememoryhandler(request):
-    target_filehandler = _session_filehandler(request)
+    if request.config.getoption("logfest") in ["basic", "full"]:
+        target_filehandler = _session_filehandler(request)
+    else:
+        target_filehandler = logging.NullHandler()
 
     file_memory_handler = MyMemoryHandler(capacity=None, flushLevel=logging.WARNING, target=target_filehandler)
     return file_memory_handler
@@ -69,7 +69,9 @@ def session_filememoryhandler(request):
 def fxt_session_logger(request, root_log_node, session_filememoryhandler):
     logger = logging.getLogger(root_log_node)
     logger.addHandler(session_filememoryhandler)
-    logger.addHandler(_session_filtered_filehandler(request, root_log_node))
+
+    if request.config.getoption("logfest") == "full":
+        logger.addHandler(_session_filtered_filehandler(request, root_log_node))
 
     yield logger
 
@@ -85,7 +87,8 @@ def fxt_module_logger(request, session_logger, session_filememoryhandler):
 
     logger = session_logger.getChild(".".join(file_path + [file_basename]))
 
-    logger.addHandler(_module_filehandler(request, file_path, file_basename))
+    if request.config.getoption("logfest") == "full":
+        logger.addHandler(_module_filehandler(request, file_path, file_basename))
 
     yield logger
 
@@ -120,59 +123,50 @@ def fxt_function_logger(request, module_logger, session_filememoryhandler):
 
 
 def _session_filehandler(request):
-    if request.config.getoption("logfest") in ["basic", "full"]:
-        filename_components = ["session", pytest.config._timestamp]
-        request.config.hook.pytest_logfest_log_file_name_basic(filename_components=filename_components)
-        filename = "-".join(filename_components) + ".log"
+    filename_components = ["session", request.config._timestamp]
+    request.config.hook.pytest_logfest_log_file_name_basic(filename_components=filename_components)
+    filename = "-".join(filename_components) + ".log"
 
-        _create_directory_if_it_not_exists('./artifacts')
+    _create_directory_if_it_not_exists('./artifacts')
 
-        file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a')
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
-        file_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a')
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
+    file_handler.setFormatter(formatter)
 
-        return file_handler
-    else:
-        return logging.NullHandler()
+    return file_handler
 
 
 def _session_filtered_filehandler(request, root_log_node):
-    if request.config.getoption("logfest") == "full":
-        filename_components = [root_log_node, pytest.config._timestamp]
-        request.config.hook.pytest_logfest_log_file_name_full_session(filename_components=filename_components)
-        filename = "-".join(filename_components) + ".log"
+    filename_components = [root_log_node, request.config._timestamp]
+    request.config.hook.pytest_logfest_log_file_name_full_session(filename_components=filename_components)
+    filename = "-".join(filename_components) + ".log"
 
-        file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a', delay=True)
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
-        file_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler('./artifacts/%s' % filename, mode='a', delay=True)
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
+    file_handler.setFormatter(formatter)
 
-        filter = FilterOnExactNodename(root_log_node)
-        file_handler.addFilter(filter)
+    filter = FilterOnExactNodename(root_log_node)
+    file_handler.addFilter(filter)
 
-        return file_handler
-    else:
-        return logging.NullHandler()
+    return file_handler
 
 
 def _module_filehandler(request, file_path, file_basename):
-    if request.config.getoption("logfest") == "full":
-        log_dir = "./artifacts/" + os.path.sep.join(file_path)
-        _create_directory_if_it_not_exists(log_dir)
+    log_dir = "./artifacts/" + os.path.sep.join(file_path)
+    _create_directory_if_it_not_exists(log_dir)
 
-        filename_components = [file_basename, pytest.config._timestamp]
-        request.config.hook.pytest_logfest_log_file_name_full_module(filename_components=filename_components)
-        filename = "-".join(filename_components) + ".log"
+    filename_components = [file_basename, request.config._timestamp]
+    request.config.hook.pytest_logfest_log_file_name_full_module(filename_components=filename_components)
+    filename = "-".join(filename_components) + ".log"
 
-        file_handler = logging.FileHandler('%s/%s' % (log_dir, filename), mode='a')
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
-        file_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler('%s/%s' % (log_dir, filename), mode='a')
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(name)s - %(message)s', "%H:%M:%S")
+    file_handler.setFormatter(formatter)
 
-        return file_handler
-    else:
-        return logging.NullHandler()
+    return file_handler
 
 
 def _create_directory_if_it_not_exists(path):
