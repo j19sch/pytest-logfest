@@ -1,6 +1,8 @@
 # What Python version is installed where:
 # http://www.appveyor.com/docs/installed-software#python
 
+version: 1.0.{build}
+
 environment:
   matrix:
     - PYTHON: "C:\\Python27"
@@ -27,7 +29,7 @@ install:
   - "%PYTHON%/Scripts/pip install tox"
   - "%PYTHON%/Scripts/pip install wheel"
 
-build: off  # Not a C# project, build stuff at the test step instead.
+build: off
 
 test_script:
   - "%PYTHON%/Scripts/tox -e %TOX_ENV%"
