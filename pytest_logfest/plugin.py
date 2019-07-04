@@ -29,7 +29,7 @@ def pytest_report_header(config):
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    """makes test result available to fixtures"""
+    """Makes test result available to fixtures"""
     outcome = yield
     rep = outcome.get_result()
 
@@ -48,6 +48,7 @@ def pytest_configure(config):
 
 @pytest.fixture(scope='session', autouse=True)
 def root_log_node(request):
+    """Returns name of the root log node taken either from the .ini file or else from the session node name."""
     if request.config.getini("logfest-root-node"):
         return request.config.getini("logfest-root-node")
     else:
