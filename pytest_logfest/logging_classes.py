@@ -30,11 +30,11 @@ class MyMemoryHandler(logging.handlers.MemoryHandler):
             return super(MyMemoryHandler, self).shouldFlush(record)
 
     def flush_with_filter_on_info(self):
-        filter_info = FilterOnLogLevel(logging.INFO)
+        filter_on_info = FilterOnLogLevel(logging.INFO)
 
         if self.target:
-            self.target.addFilter(filter_info)
+            self.target.addFilter(filter_on_info)
             self.flush()
-            self.target.removeFilter(filter_info)
+            self.target.removeFilter(filter_on_info)
         else:
             self.flush()
