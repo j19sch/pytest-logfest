@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name='pytest-logfest',
-    version='0.2.0',
+    version='0.3.0',
     author='Joep Schuurkes',
     author_email='j19sch@gmail.com',
     maintainer='Joep Schuurkes',
@@ -37,6 +37,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Operating System :: OS Independent',
