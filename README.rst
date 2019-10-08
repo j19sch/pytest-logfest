@@ -6,6 +6,10 @@ pytest-logfest
     :target: https://pypi.org/project/pytest-logfest
     :alt: PyPI version
 
+.. image:: https://img.shields.io/pypi/dw/pytest-logfest
+    :target: https://pypistats.org/packages/pytest-logfest
+    :alt: PyPI - Downloads
+
 .. image:: https://img.shields.io/pypi/pyversions/pytest-logfest.svg
     :target: https://pypi.org/project/pytest-logfest
     :alt: Python versions
