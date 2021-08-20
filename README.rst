@@ -30,6 +30,8 @@ Pytest plugin providing three logger fixtures with basic or full writing to log 
 
 ----
 
+**Note**: An improved rewrite of this plugin is `pytest-instrument`_.
+
 
 Features
 --------
@@ -153,3 +155,4 @@ Thanks to my employer `Mendix`_, for the crafting days in which I worked on this
 .. _`pip`: https://pypi.org/project/pip/
 .. _`PyPI`: https://pypi.org/project
 .. _`Mendix`: https://www.mendix.com
+.. _`pytest-instrument`: https://github.com/j19sch/pytest-instrument
